@@ -8,7 +8,7 @@
          [rows (map list (range (length input)))]
          [combs (sequence->list (in-values-sequence (in-parallel rows cols)))])
     (begin
-      (for*/list ([ls (map (lambda (pr)
+      (for*/set ([ls (map (lambda (pr)
                              (map (curry apply cons) (cartesian-product (car pr) (cadr pr))))
                            combs)]
                   [e ls])
@@ -29,18 +29,18 @@
                                                       [((cons x y) 'RIGHT) (list x (+ y 1) 'DOWN)]
                                                       [((cons x y) 'LEFT) (list x (- y 1) 'UP)])])
       (cond
-        [(set-member? (hash-ref cache current list) direction) #f]
+        [(set-member? (hash-ref cache current set) direction) #f]
         [(or (>= x_ (length input)) (>= y_ (length (car input)))) fields]
         [(or (< x_ 0) (< y_ 0)) fields]
         [(set-member? obstacles (cons x_ y_))
          (rec fields
-              (hash-update cache current (lambda (s) (set-add s direction)) list)
+              (hash-update cache current (lambda (s) (set-add s direction)) set)
               current
               maybe-dir)]
         [else
          (begin
            (rec (set-add fields (cons x_ y_))
-                (hash-update cache current (lambda (s) (set-add s direction)) list)
+                (hash-update cache current (lambda (s) (set-add s direction)) set)
                 (cons x_ y_)
                 direction))]))))
 (set-count (visited obstacles))
