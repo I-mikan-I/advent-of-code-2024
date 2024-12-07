@@ -9,9 +9,9 @@
          [combs (sequence->list (in-values-sequence (in-parallel rows cols)))])
     (begin
       (for*/set ([ls (map (lambda (pr)
-                             (map (curry apply cons) (cartesian-product (car pr) (cadr pr))))
-                           combs)]
-                  [e ls])
+                            (map (curry apply cons) (cartesian-product (car pr) (cadr pr))))
+                          combs)]
+                 [e ls])
         e))))
 (define startpos
   (let* ([row (index-where input (curry member #\^))]
