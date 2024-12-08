@@ -14,3 +14,11 @@
             [path (build-path base (syntax-e #'str))])
        (with-syntax ([final-path (datum->syntax #'str path)])
          #'final-path))]))
+
+; u = q * v + r
+; k * u' = q * v + r = q * (k * v') + r
+; ==> gcd(v, r) = k
+(define (gcd u v)
+  (if (equal? v 0)
+      u
+      (gcd v (remainder u v))))
