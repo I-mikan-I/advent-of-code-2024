@@ -22,28 +22,26 @@
 ; x2 = (t1v1 - t2v1 - u1k2 + u1k1)/(v2u1 - u2v1)
 ; min 3(k1 + x1v1) + t1 - x1u1
 (define (solutions machines)
-  (filter-map
-   (lambda (m)
-     (let*-values ([(r1 k1 t1) (gcd-e (machine-t-xa m) (machine-t-xb m))]
-                   [(r2 k2 t2) (gcd-e (machine-t-ya m) (machine-t-yb m))]
-                   [(u1 v1 u2 v2) (values (quotient (machine-t-xa m) r1)
-                                          (quotient (machine-t-xb m) r1)
-                                          (quotient (machine-t-ya m) r2)
-                                          (quotient (machine-t-yb m) r2))]
-                   [(times1) (/ (machine-t-goal-x m) r1)]
-                   [(times2) (/ (machine-t-goal-y m) r2)]
-                   [(k1) (values (* times1 k1))]
-                   [(t1) (values (* times1 t1))]
-                   [(k2) (values (* times2 k2))]
-                   [(t2) (values (* times2 t2))]
-                   [(x2) (/ (- (* t1 v1) (* t2 v1) (* u1 k2) (- (* u1 k1))) (- (* v2 u1) (* u2 v1)))]
-                   [(x1) (/ (+ k2 (* x2 v2) (- k1)) v1)])
-       (begin
-         (printf "~v ~v ~v   ~v ~v ~v   ~v ~v   ~v ~v\n" r1 k1 t1 r2 k2 t2 times1 times2 x1 x2)
-         (if (and (integer? x1) (integer? x2) (integer? times1) (integer? times2))
-             (cons (+ k1 (* x1 v1)) (- t1 (* x1 u1)))
-             #f))))
-   machines))
+  (filter-map (lambda (m)
+                (let*-values ([(r1 k1 t1) (gcd-e (machine-t-xa m) (machine-t-xb m))]
+                              [(r2 k2 t2) (gcd-e (machine-t-ya m) (machine-t-yb m))]
+                              [(u1 v1 u2 v2) (values (quotient (machine-t-xa m) r1)
+                                                     (quotient (machine-t-xb m) r1)
+                                                     (quotient (machine-t-ya m) r2)
+                                                     (quotient (machine-t-yb m) r2))]
+                              [(times1) (/ (machine-t-goal-x m) r1)]
+                              [(times2) (/ (machine-t-goal-y m) r2)]
+                              [(k1) (values (* times1 k1))]
+                              [(t1) (values (* times1 t1))]
+                              [(k2) (values (* times2 k2))]
+                              [(t2) (values (* times2 t2))]
+                              [(x2) (/ (- (* t1 v1) (* t2 v1) (* u1 k2) (- (* u1 k1)))
+                                       (- (* v2 u1) (* u2 v1)))]
+                              [(x1) (/ (+ k2 (* x2 v2) (- k1)) v1)])
+                  (if (and (integer? x1) (integer? x2) (integer? times1) (integer? times2))
+                      (cons (+ k1 (* x1 v1)) (- t1 (* x1 u1)))
+                      #f)))
+              machines))
 (for/sum ([s (solutions machines)]) (+ (* 3 (car s)) (cdr s)))
 (for/sum ([s
            (solutions (map (lambda (m)
