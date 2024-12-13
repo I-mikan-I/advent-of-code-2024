@@ -2,7 +2,9 @@
 
 (require racket/runtime-path)
 (require (for-syntax racket/runtime-path))
-(provide rpath)
+(provide rpath
+         gcd
+         gcd-e)
 
 ; relative path
 (define-syntax (rpath stx)
@@ -22,3 +24,12 @@
   (if (equal? v 0)
       u
       (gcd v (remainder u v))))
+
+(define (gcd-e u v [l '(1 . 0)] [m '(0 . 1)])
+  (if (equal? v 0)
+      (values u (car l) (car m))
+      (let-values ([(q r) (quotient/remainder u v)])
+        (gcd-e v
+               r
+               (cons (cdr l) (- (car l) (* q (cdr l))))
+               (cons (cdr m) (- (car m) (* q (cdr m))))))))
