@@ -4,6 +4,8 @@
 (require (for-syntax racket/runtime-path))
 (provide rpath
          gcd
+         vector-refs
+         vector-sets!
          gcd-e)
 
 ; relative path
@@ -16,6 +18,23 @@
             [path (build-path base (syntax-e #'str))])
        (with-syntax ([final-path (datum->syntax #'str path)])
          #'final-path))]))
+
+(define-syntax (vector-refs stx)
+  (syntax-case stx ()
+    [(_ v idx) #'(vector-ref v idx)]
+    [(_ v idxs ...)
+     (let* ([idxs (syntax-e #'(idxs ...))])
+       (foldl (lambda (idx v)
+                (with-syntax ([v v]
+                              [idx idx])
+                  #'(vector-ref v idx)))
+              #'v
+              idxs))]))
+
+(define-syntax (vector-sets! stx)
+  (syntax-case stx ()
+    [(_ v idx val) #'(vector-set! v idx val)]
+    [(_ v idxs ... last val) #'(vector-set! (vector-refs v idxs ...) last val)]))
 
 ; u = q * v + r
 ; k * u' = q * v + r = q * (k * v') + r

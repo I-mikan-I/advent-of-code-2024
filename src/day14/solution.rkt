@@ -61,6 +61,5 @@
               [(k) (let ([k1 (ceiling (/ (- x) v))]
                          [k2 (ceiling (/ y u))])
                      (if (> k1 k2) k1 k2))]
-              [(x) (+ x (* k v))]
-              [(y) (- y (* k u))])
+              [(x) (+ x (* k v))])
   (+ l1 (* a x)))
