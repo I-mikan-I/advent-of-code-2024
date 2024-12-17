@@ -1,13 +1,14 @@
 #lang racket
 (require "../utils.rkt")
-; (define input (file->string (rpath "input.txt")))
+(define input (file->string (rpath "input.txt")))
 
-(define A (box 51342988))
-(define B (box 0))
-(define C (box 0))
-(define IP (box 0))
+(define A (box (string->number (cadr (regexp-match #px"Register A: (\\d+)" input)))))
+(define B (box (string->number (cadr (regexp-match #px"Register B: (\\d+)" input)))))
+(define C (box (string->number (cadr (regexp-match #px"Register C: (\\d+)" input)))))
 (define program
-  (list->vector (map string->number (string-split "2,4,1,3,7,5,4,0,1,3,0,3,5,5,3,0" ","))))
+  (list->vector (map string->number
+                     (string-split (cadr (regexp-match #px"Program: ([^\\s]+)" input)) ","))))
+(define IP (box 0))
 ; bst 4 (A) B = A%8
 ; bxl 3 (3) B = B xor 3
 ; cdv 5 (B) C = A / 2^B
@@ -58,8 +59,6 @@
           (set-box! IP (+ (unbox IP) 2))
           (eval output)))))
 
-(eval '())
-
 (define (reset a)
   (set-box! A a)
   (set-box! B 0)
@@ -80,7 +79,5 @@
                                     (reverse (eval '())))))
          (+ hi lo)))]))
 
-(find-A (vector->list program))
-
-(reset 108107574778365)
-(eval '())
+(displayln (string-join (map number->string (reverse (eval '()))) ","))
+(displayln (car (find-A (vector->list program))))

@@ -10,35 +10,34 @@
          char->symbol
          bellman-ford)
 
-(define (bellman-ford adj-to start [merge (lambda (l _) l)])
-  (let rec ([result (hash start (cons (merge start start) 0))]
+(define (bellman-ford adj-to start [merge (lambda (accum leq) leq)] [empty '()])
+  (let rec ([result (hash start (cons (merge empty start) 0))]
             [queue (set start)])
     (define to-update
       (for*/list ([from queue]
                   [to (adj-to from)]
-                  #:do
-                  [(define from-dist (cdr (hash-ref result from)))
-                   (define edge-dist (cdr to))
-                   (define to-node (car to))
-                   (define to-dist
-                     (and (hash-has-key? result to-node) (cdr (hash-ref result to-node))))
-                   (define leq
-                     (or (not (hash-has-key? result to-node)) (<= (+ edge-dist from-dist) to-dist)))
-                   (define lt (and leq (< (+ edge-dist from-dist) to-dist)))]
+                  #:do [(define from-dist (cdr (hash-ref result from)))
+                        (define edge-dist (cdr to))
+                        (define to-node (car to))
+                        (define to-dist
+                          (and (hash-has-key? result to-node) (cdr (hash-ref result to-node))))
+                        (define leq
+                          (or (not (hash-has-key? result to-node))
+                              (<= (+ edge-dist from-dist) to-dist)))]
                   #:when leq)
-        (cons to-node
-              (cons (merge from
-                           (if lt
-                               from
-                               (car (hash-ref result to-node))))
-                    (+ edge-dist from-dist)))))
+        (cons to-node (cons from (+ edge-dist from-dist)))))
     (define queue-next (list->set (map car to-update)))
     (define result-next
       (foldl (lambda (updt result)
+               (match-define (cons to-node (cons from-node dist)) updt)
                (hash-update result
-                            (car updt)
-                            (lambda (last) (merge last (cdr updt)))
-                            (lambda () (cdr updt))))
+                            to-node
+                            (lambda (last)
+                              (cond
+                                [(< dist (cdr last)) (cons (merge empty from-node) dist)]
+                                [(<= dist (cdr last)) (cons (merge (car last) from-node) dist)]
+                                [else last]))
+                            (lambda () (cons (merge empty from-node) dist))))
              result
              to-update))
     (if (set-empty? queue-next)

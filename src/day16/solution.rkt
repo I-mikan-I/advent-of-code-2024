@@ -49,9 +49,22 @@
       [end (for*/or ([r (in-range (vector-length layout))]
                      [c (in-range (vector-length (vector-ref layout r)))])
              (and (equal? (vector-refs layout r c) 'E) (list r c)))])
-  (define solved (bellman-ford (adj-to adjs) start))
-  (println (bellman-ford (adj-to adjs) start #t))
-  (foldl min
-         99999999
-         (map (compose cdr (curry hash-ref solved))
-              (map (curry apply append) (cartesian-product (list end) '((R) (D) (L) (U)))))))
+  (define solved (bellman-ford (adj-to adjs) start set-add (set)))
+  (define ends (map (curry apply append) (cartesian-product (list end) '((R) (D) (L) (U)))))
+  (define min-end
+    (foldl (lambda (next min)
+             (if (< (cdr (hash-ref solved next)) (cdr (hash-ref solved min))) next min))
+           (car ends)
+           (cdr ends)))
+  (define best-fields
+    (let rec ([fields (set min-end)])
+      (define next
+        (set-union fields
+                   (for*/set ([f fields]
+                              [fn (car (hash-ref solved f))])
+                     fn)))
+      (if (equal? next fields)
+          next
+          (rec next))))
+  (values (cdr (hash-ref solved min-end))
+          (set-count (list->set (set-map best-fields (lambda (l) (take l 2)))))))
