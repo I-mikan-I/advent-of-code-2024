@@ -1,6 +1,6 @@
 #lang racket
 (require "../utils.rkt")
-(define input (file->string (rpath "input.txt")))
+; (define input (file->string (rpath "input.txt")))
 
 (define A (box 51342988))
 (define B (box 0))
@@ -60,24 +60,27 @@
 
 (eval '())
 
-(define (find-A)
-  (for/fold ([res 0]
-             [m (vector->list program)])
-            ([pos (in-naturals)])
-    #:break (empty? m)
-    (println m)
-    (match-let ([(cons i len) (for/or ([i (in-naturals)])
-                                (and (equal? 0 (modulo i 1000000)) (println i))
-                                (set-box! A i)
-                                (set-box! B 0)
-                                (set-box! C 0)
-                                (set-box! IP 0)
-                                (define output (reverse (eval '())))
-                                (println output)
-                                (and (for/and ([sym output]
-                                               [sym2 m])
-                                       (equal? sym sym2))
-                                     (cons i (length output))))])
-      (values (+ res (* (expt 8 pos) i)) (drop m len)))))
+(define (reset a)
+  (set-box! A a)
+  (set-box! B 0)
+  (set-box! C 0)
+  (set-box! IP 0))
 
-(find-A)
+(define (find-A want)
+
+  (match want
+    ['() '(0)]
+    [(cons _ t)
+     (let ([sols (map (curry * 8) (find-A t))])
+       (for*/list ([hi sols]
+                   [lo (in-range 8)]
+                   #:when (equal? want
+                                  (begin
+                                    (reset (+ hi lo))
+                                    (reverse (eval '())))))
+         (+ hi lo)))]))
+
+(find-A (vector->list program))
+
+(reset 108107574778365)
+(eval '())
