@@ -8,6 +8,7 @@
          vector-sets!
          gcd-e
          char->symbol
+         floyd-warshall
          bellman-ford)
 
 (define (bellman-ford adj-to start [merge (lambda (accum leq) leq)] [empty '()])
@@ -43,6 +44,39 @@
     (if (set-empty? queue-next)
         result-next
         (rec result-next queue-next))))
+
+(define (floyd-warshall adj-to nodes [max 10000])
+  (define len (length nodes))
+  (define ids
+    (for/hash ([node nodes]
+               [i (in-naturals)])
+      (values node i)))
+  (define dists
+    (for/vector ([node1 nodes])
+      (for/vector ([node2 nodes])
+        (if (eq? node1 node2) 0 max))))
+  (for* ([node nodes]
+         [adj (adj-to node)])
+    (match-define (cons node2 w) adj)
+    (vector-sets! dists
+                  (hash-ref ids node)
+                  (hash-ref ids node2)
+                  (min w (vector-refs dists (hash-ref ids node) (hash-ref ids node2)))))
+  (for* ([k (in-range len)]
+         #:do [(println k)]
+         [i (in-range len)]
+         [j (in-range len)])
+
+    (define new-dist (+ (vector-refs dists i k) (vector-refs dists k j)))
+    (if (> (vector-refs dists i j) new-dist)
+        (vector-sets! dists i j new-dist)
+        (void)))
+  (for/hash ([from nodes]
+             [i (in-naturals)]
+             #:when #t
+             [to nodes]
+             [k (in-naturals)])
+    (values (cons from to) (vector-refs dists i k))))
 
 (define (char->symbol chr)
   (string->symbol (string chr)))

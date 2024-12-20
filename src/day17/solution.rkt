@@ -46,7 +46,6 @@
       (let ([opc (vector-ref program (unbox IP))]
             [operand (vector-ref program (+ 1 (unbox IP)))])
         (begin
-          ; (printf "opc: ~a operand: ~a\nA: ~a B: ~a C: ~a\n" opc operand (unbox A) B C)
           (match opc
             [0 (xdv A operand)]
             [1 (bxl operand)]

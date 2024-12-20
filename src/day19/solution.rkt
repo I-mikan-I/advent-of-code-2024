@@ -10,7 +10,6 @@
   (hash-ref! cache
              design
              (lambda ()
-               (printf "checking: ~a\n" design)
                (if (non-empty-string? design)
                    (let ([trimmed (for/list ([pattern patterns]
                                              #:when (string-prefix? design pattern))
