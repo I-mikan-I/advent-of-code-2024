@@ -17,4 +17,5 @@
                      (for/sum ([trimmed trimmed]) (valid trimmed)))
                    1))))
 
-(for/sum ([design designs] [i (in-naturals)]) (println i) (valid design))
+(for/sum ([design designs] [_ (in-naturals)])  (if (> (valid design) 0) 1 0))
+(for/sum ([design designs] [_ (in-naturals)])  (valid design))
